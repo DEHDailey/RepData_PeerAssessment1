@@ -6,13 +6,27 @@ In this project, I am examining data from an activity monitor that recorded the 
 ## Loading and preprocessing the data
 
 __Load the data__
-```{r LoadPreprocess, results='hide'}
+
+```r
 ## Prepare the workspace by loading packages
 ## require() works like library() but returns TRUE if the package loads successfully
 ## stopifnot() halts execution if the condition fails (the script cannot load the required package)
 stopifnot( require( lattice ) )
-stopifnot( require( reshape2 ) )
+```
 
+```
+## Loading required package: lattice
+```
+
+```r
+stopifnot( require( reshape2 ) )
+```
+
+```
+## Loading required package: reshape2
+```
+
+```r
 ## Load data from zip file which is expected to exist in working directory
 zipFile <- 'activity.zip'
 if( !file.exists( zipFile ) ) {
@@ -23,8 +37,8 @@ stepData <- read.csv( unz( zipFile, filename='activity.csv' ) )
  
 -----
 __Process/transform the data into suitable formats__
-```{r ProcessData}
 
+```r
 ## Apply data transformations.
 stepData <- transform( stepData, Date        = as.Date( as.character( stepData$date ) ) )
 stepData <- transform( stepData, DayOfWeek   = weekdays( Date ), stringsAsFactors=FALSE )
@@ -44,7 +58,8 @@ stepData <- transform( stepData, IntervalTime = sprintf( '%02d:%02d', interval%/
 ## What is the mean total number of steps taken per day?
 
 __Make histogram: total number of steps per day__
-```{r PlotStepsPerDay}
+
+```r
 ## Must do some calculations first
 stepsPerDay  <- tapply( stepData$steps, INDEX = list( stepData$Date ), FUN = sum, na.rm=TRUE )
 valuesPerDay <- tapply( stepData$steps, INDEX = list( stepData$Date ), FUN = function( . ) sum( !is.na( . ) ) )
@@ -61,22 +76,26 @@ abline( v=stepMean, col='blue', lwd=2 )
 title( sub=sprintf( 'Vertical line at mean (%s steps)', prettyNum( round( stepMean, 2), big.mark=',' ) ), col.sub='blue' )
 ```
 
+![plot of chunk PlotStepsPerDay](figure/PlotStepsPerDay.png) 
+
 -----
 __Report mean and median steps per day__
 
-Over the reporting period, a mean of `r prettyNum(stepMean, big.mark=',' )` steps were recorded each day. The median number of steps per day is `r prettyNum( stepMedian, big.mark=',' )`.
+Over the reporting period, a mean of 9,354 steps were recorded each day. The median number of steps per day is 10,395.
 
-**Note:** The mean and median reported above include `r sum( valuesPerDay == 0 )` days for which all observations were missing.  These days are recorded as having zero steps; these zero values will drag the mean and median downward.  Excluding days for which the total number of steps was zero, the mean number of steps per day is `r prettyNum( stepMeanNonZero, big.mark=',' )` and the median is 
-`r prettyNum( stepMedianNonZero, big.mark=',' )`.
+**Note:** The mean and median reported above include 8 days for which all observations were missing.  These days are recorded as having zero steps; these zero values will drag the mean and median downward.  Excluding days for which the total number of steps was zero, the mean number of steps per day is 10,766 and the median is 
+10,765.
 
 
 ## What is the average daily activity pattern?
 
 __Time series plot of daily activity__
-```{r DailyActivity}
-stepsPerInterval <- tapply( stepData$steps, INDEX = list( stepData$IntervalTime ), FUN = mean, na.rm=TRUE )
 
-```{r PlotDailyActivity}
+```r
+stepsPerInterval <- tapply( stepData$steps, INDEX = list( stepData$IntervalTime ), FUN = mean, na.rm=TRUE )
+```
+
+```r
 plot( stepsPerInterval, type='l', xaxt='n', xlab='Time of Day', ylab='Average Steps' )
 title( main='Average Steps Per 5-Minute Interval' )
 
@@ -86,26 +105,30 @@ tt.label <- c( grep( ':00$', names( stepsPerInterval ), value=TRUE ), '24:00' )
 axis( side=1, at=tt.index, labels=tt.label )
 ```
 
+![plot of chunk PlotDailyActivity](figure/PlotDailyActivity.png) 
+
 -----
 __Interval with maximum average steps__
 
-```{r InteveralWithMaxSteps}
+
+```r
 mm.index <- which.max( stepsPerInterval )
 mm.value <- stepsPerInterval[ mm.index ]
 mm.label <- names( mm.value )
 ```
 
-On average across the `r length( stepsPerDay )` days in the dataset, the maximum average number of steps occurs within the 5-minute interval beginning at `r mm.label`.  The maxmimum average value is `r round( mm.value, 2 )`.  These averages are calculated by ignoring missing data within any given 5-minute interval.
+On average across the 61 days in the dataset, the maximum average number of steps occurs within the 5-minute interval beginning at 08:35.  The maxmimum average value is 206.17.  These averages are calculated by ignoring missing data within any given 5-minute interval.
 
 ## Imputing missing values
 
 __Report number of missing values__
 
-The dataset includes `r sum( is.na( stepData$steps ) )` missing values for step counts within 5-minute intervals, out of `r nrow( stepData )` observations in all.  We can assign plausible values for these missing data.  For each missing value, I will assign the mean value of observed counts within the same 5-minute interval across all days in the dataset.
+The dataset includes 2304 missing values for step counts within 5-minute intervals, out of 17568 observations in all.  We can assign plausible values for these missing data.  For each missing value, I will assign the mean value of observed counts within the same 5-minute interval across all days in the dataset.
 
 -----
 __Apply strategy for filling in missing values__
-```{r ImputeMissingValues}
+
+```r
 ## Strategy: fill in using mean of nonmissing values for the same interval.
 ## These mean values are already in stepsPerInterval, calculated earlier.
 imputedValues <- with( stepData, 
@@ -118,7 +141,8 @@ stepData <- transform( stepData, StepImpute = imputedValues )
 
 -----
 __Create a new dataset with missing data filled in__
-```{r CreateNewDataset}
+
+```r
 ## Create a new dataset equal to original dataset but with missing data filled in
 stepFilled <- stepData
 stepFilled$steps <- stepFilled$StepImpute
@@ -126,7 +150,8 @@ stepFilled$steps <- stepFilled$StepImpute
 
 -----
 __Histogram of steps per day including filled data; summarize differences from unfilled data__
-```{r HistogramImputedSteps}
+
+```r
 hist( filledPerDay <- with( stepFilled, tapply( steps, INDEX=list( Date ), FUN=sum ) ),
       col='steelblue', breaks=seq( 0, 1000 * ceiling( max( filledPerDay )/1000), by=1000 ),
       xlab='Total Steps per Day', 
@@ -137,22 +162,31 @@ abline( v=filledMean, col='blue', lwd=2 )
 title( sub=sprintf( 'Vertical line at mean (%s steps)', prettyNum( round( filledMean, 2), big.mark=',' ) ), col.sub='blue' )
 ```
 
-Using step counts imputed for missing data within 5-minute intervals, a mean of `r prettyNum(filledMean, big.mark=',' )` steps were recorded each day. The median number of steps per day is `r prettyNum( filledMedian, big.mark=',' )`.  These mean and median values are notably different from the mean and median values computed before filling in plausible values for missing data, but are nearly identical to the mean and median values calculated while ignoring zero-step days (will all missing values).
+![plot of chunk HistogramImputedSteps](figure/HistogramImputedSteps.png) 
+
+Using step counts imputed for missing data within 5-minute intervals, a mean of 10,766 steps were recorded each day. The median number of steps per day is 10,766.  These mean and median values are notably different from the mean and median values computed before filling in plausible values for missing data, but are nearly identical to the mean and median values calculated while ignoring zero-step days (will all missing values).
 
 Comparing the plausibly-filled data to the zero-filled data, the mean of the plausibly-filled data is much higher, and now is much closer to the value of the median.  Filling in plausible values-- and thereby removing the days where zero steps were recorded because all values were missing-- has resulted in a much more symmetric distribution.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 __Create factor variable for weekday/weekend__
-```{r DayTypeFactor}
+
+```r
 ## The required factor variable is created as part of the original set of data transformations
 ## Summarize the variable here
 with( stepFilled, summary( DayType ) )
 ```
 
+```
+## Weekday Weekend 
+##   12960    4608
+```
+
 -----
 __Panel plot of time series: Weekday and Weekend activity levels__
-```{r WeekendPatterns}
+
+```r
 ## The required factor variable for weekends and weekdays is created above, under
 ## "Loading and Preprocessing the Data"
 avgByIntervalType <- with( stepFilled, tapply( steps, INDEX= list( IntervalTime, DayType ), FUN=mean ) )
@@ -170,7 +204,9 @@ xyplot( Steps ~ TimeOfDay | DayType, data=avgMelt, type='l', layout=c( 1, 2 ),
         sub='Includes imputed values for missing data' )
 ```
 
-Based on the number of steps recorded during each 5-minute interval over this period of `r length( stepsPerDay )` days, this particular person appeared to be:
+![plot of chunk WeekendPatterns](figure/WeekendPatterns.png) 
+
+Based on the number of steps recorded during each 5-minute interval over this period of 61 days, this particular person appeared to be:
 
 - Active earlier in the morning on weekdays than on weekends.
 - More consistently active on weekend days than on days during the week.
