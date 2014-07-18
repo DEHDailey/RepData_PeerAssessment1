@@ -68,7 +68,7 @@ stepMeanNonZero <- mean( stepsPerDay[ stepsPerDay > 0 ] )
 stepMedian        <- median( stepsPerDay, na.rm=TRUE )
 stepMedianNonZero <- median( stepsPerDay[ stepsPerDay > 0 ] )
 
-par( las=1 )
+par( las=1, bg='white' )
 hist( stepsPerDay, breaks=seq( 0, 1000*ceiling( max( stepsPerDay ) / 1000 ), by = 1000 ), 
       col='steelblue', xlab='Total Steps per Day', 
       main='Histogram of Steps per Day, in groups of 1000 steps',
@@ -97,8 +97,8 @@ stepsPerInterval <- tapply( stepData$steps, INDEX = list( stepData$IntervalTime 
 ```
 
 ```r
-plot( stepsPerInterval, type='l', xaxt='n', xlab='Time of Day', ylab='Average Steps',
-      bg='white' )  # White background easier to evaluate than transparent (knitr default)
+par( bg='white' )
+plot( stepsPerInterval, type='l', xaxt='n', xlab='Time of Day', ylab='Average Steps' )
 title( main='Average Steps Per 5-Minute Interval' )
 
 ## Label the x-axis at the hours
@@ -154,11 +154,11 @@ stepFilled$steps <- stepFilled$StepImpute
 __Histogram of steps per day including filled data; summarize differences from unfilled data__
 
 ```r
+par( las=1, bg='white' )
 hist( filledPerDay <- with( stepFilled, tapply( steps, INDEX=list( Date ), FUN=sum ) ),
       col='steelblue', breaks=seq( 0, 1000 * ceiling( max( filledPerDay )/1000), by=1000 ),
       xlab='Total Steps per Day', 
-      main='Histogram of Steps per Day, in groups of 1000 steps,\nincluding imputed values',
-      bg='white' )  # White background easier to evaluate than transparent (knitr default)
+      main='Histogram of Steps per Day, in groups of 1000 steps,\nincluding imputed values' )
 filledMean   <- mean( filledPerDay, na.rm=TRUE )
 filledMedian <- median( filledPerDay, na.rm=TRUE )
 abline( v=filledMean, col='blue', lwd=2 )
@@ -200,12 +200,12 @@ colnames( avgMelt ) <- c( 'TimeOfDay', 'DayType', 'Steps' )
 tt.index <- c( grep( ':00$', names( stepsPerInterval ) ), length( stepsPerInterval ) + 1 )
 tt.label <- c( grep( ':00$', names( stepsPerInterval ), value=TRUE ), '24:00' )
 
+par( bg='white' )
 xyplot( Steps ~ TimeOfDay | DayType, data=avgMelt, type='l', layout=c( 1, 2 ),
         scales = list( x = list( at=tt.index, labels=tt.label, rot=60 ) ),
         ylab='Average Steps Per Interval', xlab='Time of Day', 
         main='Activity Patterns by Time of Day and Weekend/Weekday', 
-        sub='Includes imputed values for missing data',
-        bg='white' )  # White background easier to evaluate than transparent (knitr default)
+        sub='Includes imputed values for missing data' )
 ```
 
 ![plot of chunk WeekendPatterns](figure/WeekendPatterns.png) 
