@@ -56,7 +56,8 @@ stepMedianNonZero <- median( stepsPerDay[ stepsPerDay > 0 ] )
 par( las=1 )
 hist( stepsPerDay, breaks=seq( 0, 1000*ceiling( max( stepsPerDay ) / 1000 ), by = 1000 ), 
       col='steelblue', xlab='Total Steps per Day', 
-      main='Histogram of Steps per Day, in groups of 1000 steps' )
+      main='Histogram of Steps per Day, in groups of 1000 steps',
+      bg='white' )  # White background easier to evaluate than transparent (knitr default)
 abline( v=stepMean, col='blue', lwd=2 )
 title( sub=sprintf( 'Vertical line at mean (%s steps)', prettyNum( round( stepMean, 2), big.mark=',' ) ), col.sub='blue' )
 ```
@@ -77,7 +78,8 @@ __Time series plot of daily activity__
 stepsPerInterval <- tapply( stepData$steps, INDEX = list( stepData$IntervalTime ), FUN = mean, na.rm=TRUE )
 
 ```{r PlotDailyActivity}
-plot( stepsPerInterval, type='l', xaxt='n', xlab='Time of Day', ylab='Average Steps' )
+plot( stepsPerInterval, type='l', xaxt='n', xlab='Time of Day', ylab='Average Steps',
+      bg='white' )  # White background easier to evaluate than transparent (knitr default)
 title( main='Average Steps Per 5-Minute Interval' )
 
 ## Label the x-axis at the hours
@@ -130,7 +132,8 @@ __Histogram of steps per day including filled data; summarize differences from u
 hist( filledPerDay <- with( stepFilled, tapply( steps, INDEX=list( Date ), FUN=sum ) ),
       col='steelblue', breaks=seq( 0, 1000 * ceiling( max( filledPerDay )/1000), by=1000 ),
       xlab='Total Steps per Day', 
-      main='Histogram of Steps per Day, in groups of 1000 steps,\nincluding imputed values' )
+      main='Histogram of Steps per Day, in groups of 1000 steps,\nincluding imputed values',
+      bg='white' )  # White background easier to evaluate than transparent (knitr default)
 filledMean   <- mean( filledPerDay, na.rm=TRUE )
 filledMedian <- median( filledPerDay, na.rm=TRUE )
 abline( v=filledMean, col='blue', lwd=2 )
@@ -167,7 +170,8 @@ xyplot( Steps ~ TimeOfDay | DayType, data=avgMelt, type='l', layout=c( 1, 2 ),
         scales = list( x = list( at=tt.index, labels=tt.label, rot=60 ) ),
         ylab='Average Steps Per Interval', xlab='Time of Day', 
         main='Activity Patterns by Time of Day and Weekend/Weekday', 
-        sub='Includes imputed values for missing data' )
+        sub='Includes imputed values for missing data',
+        bg='white' )  # White background easier to evaluate than transparent (knitr default)
 ```
 
 Based on the number of steps recorded during each 5-minute interval over this period of `r length( stepsPerDay )` days, this particular person appeared to be:
